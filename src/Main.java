@@ -4,6 +4,8 @@ import java.io.IOException;
 
 public class Main {
     private static String rawText;
+    private static double coincidenceChain = 0.065;
+    private static double randomChain = 0.038;
 
     public static void main(String[] args) throws IOException {
         readFile();
@@ -14,8 +16,7 @@ public class Main {
     }
 
     public static void readFile() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader("20201-teste1.txt"));
-        try {
+        try (BufferedReader br = new BufferedReader(new FileReader("20201-teste1.txt"))) {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 
@@ -25,55 +26,59 @@ public class Main {
                 line = br.readLine();
             }
             rawText = sb.toString();
-        } finally {
-            br.close();
         }
     }
 
     public static void searchKeySize() {
-        double coincidenceChain = 0.065;
-        double randomChain = 0.038;
 
-        for (int i = 0; i < 10; i++) {
-            System.out.println("keySize :" + i);
-            ic(i);
 
+        for (int i = 1; i < 10; i++) {
+            if (ic(i)) {
+                System.out.println("keySize :" + i);
+
+
+                break;
+            }
         }
 
 
     }
 
-    public static double ic(int keySize) {
-        long n = 0;
-        double sum = 0.0;
-        double ic = 0.0;
-        int[] alphabet = new int[26];
+    public static boolean ic(int keySize) {
 
 
-        int letter = 0;
-
-        int counter = 0;
         for (int i = 0; i < keySize; i++) {
-            for (int j = i; j < 20; j = j + keySize) {
-                System.out.println(j);
-            }
-        }
-        /*for(int i = 0; i < s.length(); i++){
-            letter = s.charAt(i) - 97;
-            if(letter >= 0 && letter < 26){
+
+            int letter;
+            long n = 0;
+            double sum = 0.0;
+            int[] alphabet = new int[26];
+
+            for (int j = i; j < rawText.length() - 2; j = j + keySize) {
+
+                letter = rawText.charAt(j) - 97;
+                //System.out.println(">>>" + rawText.length());
+                //System.out.println(rawText.charAt(j));
                 alphabet[letter]++;
                 n++;
             }
-        }*/
 
-        for (int j = 0; j < 26; j++) { // IC calculation based on counted frequencies
-            sum = sum + (alphabet[j] * (alphabet[j] - 1));
+            for (int j = 0; j < 26; j++) { // IC calculation based on counted frequencies
+                sum = sum + (alphabet[j] * (alphabet[j] - 1));
+            }
+
+            double ic = sum / (n * (n - 1)); // Formula of N(N-1) as seen in class
+            //System.out.println("ic: " + ic);
+
+            if (ic < coincidenceChain + 0.003 && ic > coincidenceChain - 0.003)
+                return true;
+
+
         }
 
-        ic = sum / (n * (n - 1)); // Formula of N(N-1) as seen in class
+        return false;
 
-        System.out.println(ic);
-        return ic;
     }
+
 
 }
