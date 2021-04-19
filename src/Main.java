@@ -88,12 +88,14 @@ public class Main {
 
     public static void setLanguageConfigs(int number) {
         if (number == 1) {
+            //estrategia para o portugues se da em pegar apenas a 3a letra mais comum, pois a 1a e a 2a sao muito proximas as probabilidades
             freqChain = new ArrayList(Arrays.asList('o'));
             coincidenceChain = 0.072723;
             language = "pt";
         }
 
         if (number == 2) {
+            //estrategia para o ingles eh mais simples, como eh espacado as probabilidades, vai se testando entre as 5 primeiras
             freqChain = new ArrayList(Arrays.asList('e', 't', 'a', 'o', 'i'));
             coincidenceChain = 0.065;
             language = "en";
@@ -101,7 +103,8 @@ public class Main {
     }
 
     public static void readFile() throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader("cypherTexts/cipher14.txt"))) {
+        //le o arquivo e armazena na variavel global String rawText
+        try (BufferedReader br = new BufferedReader(new FileReader("cypherTexts/20201-teste1.txt"))) {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 
@@ -115,6 +118,7 @@ public class Main {
     }
 
     public static void writeFile(String s) {
+        //escreve o conteudo da string s no arquivo output.txt
         try {
             FileWriter myWriter = new FileWriter("output.txt");
             myWriter.write(s);
@@ -127,6 +131,7 @@ public class Main {
     }
 
     public static void searchKeySize() {
+        //tenta achar o tamanho da chave entre 1 e 50, com o resultado obtido do indice de coincidencia
         for (int i = 1; i < 50; i++) {
             if (coincidenceIndex(i)) {
                 //System.out.println("keySize :" + i);
@@ -134,6 +139,7 @@ public class Main {
                 break;
             }
         }
+        //tratamento de erro
         if (keySize == 0) {
             System.out.println("Não foi possível encontrar o tamanho da chave, aumente o limite do incide de coincidencia");
             System.exit(0);
@@ -141,6 +147,7 @@ public class Main {
     }
 
     private static void decryptMessage(String key, int keySize) {
+        //decrypta a msg com a chave percorrendo toda a string
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < rawText.length(); i++) {
             if ((rawText.charAt(i) - key.charAt(i % keySize) + 97) < 97) {
@@ -155,6 +162,7 @@ public class Main {
     }
 
     public static boolean coincidenceIndex(int keySize) {
+        //aplica a formula com o controle da frequencia das letras armazenadas pelo array
         double total = 0;
         for (int i = 0; i < keySize; i++) {
             long n = 0;
@@ -172,36 +180,36 @@ public class Main {
 
             double ic = sum / (n * (n - 1));
 
-            //System.out.println(total);
             total += ic;
         }
 
         total = total / keySize;
         //System.out.println(keySize + " " + total);
+
+        //margem de erro do indice é 0.01, pode precisar ser mudado
         return total < coincidenceChain + 0.01 && total > coincidenceChain - 0.01;
 
     }
 
     public static void discoverKey(int keySize) {
+        //descobre a chave dado o tamanho da chave
         StringBuilder keyBuilder = new StringBuilder();
         for (int i = 0; i < keySize; i++) {
             StringBuilder sb = new StringBuilder();
             for (int j = i; j < rawText.length(); j += keySize) {
                 sb.append(rawText.charAt(j));
             }
-
+            //acha a letra mais frequente, depois compara a distancia com a mais frequente na lingua, e por ultimo
+            // aplica essa distancia para descobrir as letras da chave
             keyBuilder.append((char) (getDistance(getFreqLetter(sb.toString()), freqLetter) + 97));
-
         }
 
         key = keyBuilder.toString();
     }
 
     public static char getFreqLetter(String s) {
-        //System.out.println("s: " + s);
-
+        //procura e retorna a letra mais frequente em uma string s
         int[] alphabet = new int[26];
-        int[] highest = new int[3];
 
         long max = 0;
         int letter = 0;
@@ -217,11 +225,10 @@ public class Main {
             }
         }
 
-
         if (language.equals("en")) {
             return (char) (letter + 97);
-        } else {
 
+        } else {
             //https://www.tutorialspoint.com/Java-program-to-find-the-3rd-largest-number-in-an-array
             int[] array = new int[26];
             System.arraycopy(alphabet, 0, array, 0, 26);
@@ -236,10 +243,10 @@ public class Main {
             }
             return 'a';
         }
-
     }
 
     public static int getDistance(char a, char b) {
+        //decobre a distancia entre duas letras, geralmente uma letra a aleatoria, com a letra b (uma das letras mais comuns da lingua)
         if (a - b < 0) {
             return a - b + 26;
         }
