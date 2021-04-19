@@ -15,6 +15,7 @@ public class Main {
     private static String key;
     private static String decryptText;
 
+    private static String language;
     private static double coincidenceChain;
     private static char freqLetter;
     private static List<Character> freqChain;
@@ -44,7 +45,12 @@ public class Main {
 
         questioning:
         while (true) {
-            freqLetter = freqChain.get(iter);
+            try {
+                freqLetter = freqChain.get(iter);
+            } catch (Exception e) {
+                System.out.println("Limite de tentativas excedido");
+                System.exit(0);
+            }
             System.out.println("Discovering key size...");
             searchKeySize();
             System.out.println("Key Size found! : " + keySize);
@@ -82,18 +88,20 @@ public class Main {
 
     public static void setLanguageConfigs(int number) {
         if (number == 1) {
-            freqChain = new ArrayList(Arrays.asList('a', 'e', 'o', 's', 'i'));
+            freqChain = new ArrayList(Arrays.asList('o'));
             coincidenceChain = 0.072723;
+            language = "pt";
         }
 
         if (number == 2) {
             freqChain = new ArrayList(Arrays.asList('e', 't', 'a', 'o', 'i'));
             coincidenceChain = 0.065;
+            language = "en";
         }
     }
 
     public static void readFile() throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader("cypherTexts/DemCifrado.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("cypherTexts/cipher14.txt"))) {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 
@@ -119,12 +127,16 @@ public class Main {
     }
 
     public static void searchKeySize() {
-        for (int i = 1; i < 20; i++) {
+        for (int i = 1; i < 50; i++) {
             if (coincidenceIndex(i)) {
                 //System.out.println("keySize :" + i);
                 keySize = i;
                 break;
             }
+        }
+        if (keySize == 0) {
+            System.out.println("Não foi possível encontrar o tamanho da chave, aumente o limite do incide de coincidencia");
+            System.exit(0);
         }
     }
 
@@ -166,7 +178,7 @@ public class Main {
 
         total = total / keySize;
         //System.out.println(keySize + " " + total);
-        return total < coincidenceChain + 0.005 && total > coincidenceChain - 0.005;
+        return total < coincidenceChain + 0.01 && total > coincidenceChain - 0.01;
 
     }
 
@@ -179,19 +191,18 @@ public class Main {
             }
 
             keyBuilder.append((char) (getDistance(getFreqLetter(sb.toString()), freqLetter) + 97));
-            //System.out.println("distance: " + (char)(getDistance(getFreqLetter(sb.toString()), freqLetter)+97));
+
         }
-
-
-        //System.out.println("key: " + keyBuilder.toString());
-
 
         key = keyBuilder.toString();
     }
 
     public static char getFreqLetter(String s) {
         //System.out.println("s: " + s);
+
         int[] alphabet = new int[26];
+        int[] highest = new int[3];
+
         long max = 0;
         int letter = 0;
 
@@ -202,11 +213,29 @@ public class Main {
         for (int j = 0; j < alphabet.length; j++) {
             if (alphabet[j] > max) {
                 max = alphabet[j];
-                letter = j + 97;
+                letter = j;
             }
         }
 
-        return (char) letter;
+
+        if (language.equals("en")) {
+            return (char) (letter + 97);
+        } else {
+
+            //https://www.tutorialspoint.com/Java-program-to-find-the-3rd-largest-number-in-an-array
+            int[] array = new int[26];
+            System.arraycopy(alphabet, 0, array, 0, 26);
+            int size = array.length;
+            Arrays.sort(array);
+
+            int first = array[size - 3];
+            for (int i = 0; i < alphabet.length; i++) {
+                if (first == alphabet[i]) {
+                    return (char) (i + 97);
+                }
+            }
+            return 'a';
+        }
 
     }
 
