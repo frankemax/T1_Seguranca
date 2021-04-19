@@ -1,21 +1,28 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class Main {
     private static String rawText;
+    private static String decryptText;
+    private static String key;
+
     private static double coincidenceChain = 0.065;
     private static char freqLetter = 'e';
-    private static String key = "";
+
 
     public static void main(String[] args) throws IOException {
         readFile();
-        searchKeySize();
+        int keySize = searchKeySize();
+        key = discoverKey(keySize);
+        decryptMessage(key, keySize);
+        writeFile(decryptText);
 
     }
 
     public static void readFile() throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader("message.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("cypherTexts/20201-teste1.txt"))) {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 
@@ -28,16 +35,26 @@ public class Main {
         }
     }
 
-    public static void searchKeySize() {
-        for (int i = 1; i < 20; i++) {
-            if (ic(i)) {
-                System.out.println("keySize :" + i);
-                key = discoverKey(i);
-                decryptMessage(key, i);
+    public static void writeFile(String s) {
+        try {
+            FileWriter myWriter = new FileWriter("output.txt");
+            myWriter.write(s);
+            myWriter.close();
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
 
-                break;
+    public static int searchKeySize() {
+        for (int i = 1; i < 20; i++) {
+            if (coincidenceIndex(i)) {
+                System.out.println("keySize :" + i);
+                return i;
             }
         }
+        return 0;
     }
 
     private static void decryptMessage(String key, int keySize) {
@@ -50,9 +67,11 @@ public class Main {
             }
         }
         System.out.println("message: " + sb.toString());
+        decryptText = sb.toString();
+
     }
 
-    public static boolean ic(int keySize) {
+    public static boolean coincidenceIndex(int keySize) {
         double total = 0;
         for (int i = 0; i < keySize; i++) {
             long n = 0;
@@ -112,11 +131,7 @@ public class Main {
                 max = alphabet[j];
                 letter = j + 97;
             }
-            //System.out.println("letter: " + letter);
-            //System.out.println((char)(j+97) + " " + alphabet[j]);
         }
-
-        //System.out.println((char) letter);
 
         return (char) letter;
 
@@ -128,6 +143,5 @@ public class Main {
         }
         return a - b;
     }
-
 
 }
