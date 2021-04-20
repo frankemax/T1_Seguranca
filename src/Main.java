@@ -14,6 +14,7 @@ public class Main {
     private static int keySize;
     private static String key;
     private static String decryptText;
+    private static double marginError = 0.01;//altere a margem aqui
 
     private static String language;
     private static double coincidenceChain;
@@ -113,7 +114,8 @@ public class Main {
                 //sb.append(System.lineSeparator());
                 line = br.readLine();
             }
-            rawText = sb.toString();
+
+            rawText = sb.toString().toLowerCase();
         }
     }
 
@@ -187,7 +189,7 @@ public class Main {
         //System.out.println(keySize + " " + total);
 
         //margem de erro do indice é 0.01, pode precisar ser mudado
-        return total < coincidenceChain + 0.01 && total > coincidenceChain - 0.01;
+        return total < coincidenceChain + marginError && total > coincidenceChain - marginError;
 
     }
 
