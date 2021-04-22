@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Scanner;
 
 //Max Franke
+//Por mais que o relatorio apenas mostre a codificação na lingua inglesa, o algoritmo é o mesmo, por isso deve funcionar
+//da mesma maneira para o portugues, claro: alterando-se os valores que se referem a lingua, bem como uma mudanca na
+//estrategia para pegar a terceira letra mais comum.
 
 public class Main {
     private static String rawText;
@@ -15,6 +18,7 @@ public class Main {
     private static String key;
     private static String decryptText;
     private static double marginError = 0.01;//altere a margem aqui
+    private static String fileName = "DemCifrado.txt"; //altere o texto aqui
 
     private static String language;
     private static double coincidenceChain;
@@ -105,7 +109,7 @@ public class Main {
 
     public static void readFile() throws IOException {
         //le o arquivo e armazena na variavel global String rawText
-        try (BufferedReader br = new BufferedReader(new FileReader("cypherTexts/20201-teste1.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 
@@ -164,7 +168,8 @@ public class Main {
     }
 
     public static boolean coincidenceIndex(int keySize) {
-        //aplica a formula com o controle da frequencia das letras armazenadas pelo array
+        //aplica a formula do ci com o controle da frequencia das letras armazenadas pelo array, se estiver entre o
+        //limite designado, o indice é o que foi passado por parametro
         double total = 0;
         for (int i = 0; i < keySize; i++) {
             long n = 0;
